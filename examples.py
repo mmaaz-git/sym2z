@@ -27,6 +27,7 @@ Checking linear inequalities with integer variables
 x = Symbol('x', integer=True)
 y = Symbol('y', integer=True)
 z = Symbol('z', integer=False)
+print(check_feasibility([x+y<1, x > 0, y > 0]))
 print(check_feasibility([x+z+y<1, x > 0, y > 0]))
 
 """
