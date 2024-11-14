@@ -1,5 +1,6 @@
+from sympy import S
 import z3
-from z3 import Solver, sat
+from z3 import Solver, sat, unsat
 import re
 
 def _sympy_to_z3(expr):
@@ -25,11 +26,23 @@ def check_feasibility(system):
     if not isinstance(system, list):
         system = [system]
 
+    variables = set()
+    for expr in system:
+        variables.update(expr.free_symbols)
+
     s = Solver()
     for expr in system:
         s.add(_sympy_to_z3(expr))
 
     if s.check() == sat:
-        return "sat", s.model()
+        model = s.model()
+        result = {}
+        for var in variables:
+            z3_var = z3.Int(str(var)) if var.is_integer else z3.Real(str(var))
+            value = model.get_interp(z3_var)
+            result[var] = S(str(value))
+        return "sat", result
+    elif s.check() == unsat:
+        return "unsat", {}
     else:
-        return "unsat", []
+        return "unknown", {}
